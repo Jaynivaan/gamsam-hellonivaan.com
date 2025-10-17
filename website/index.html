@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Gamsam · hellonivaan</title>
+  <meta name="description" content="Gamsam — a quiet corner on the web by Jayakrishnan Parameswarankutty." />
+  <meta name="author" content="Jayakrishnan Parameswarankutty" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Gamsam · hellonivaan" />
+  <meta property="og:description" content="Gamsam — a quiet corner on the web." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://gamsam.hellonivaan.com/" />
+  <meta property="og:image" content="https://gamsam.hellonivaan.com/og-image.jpg" />
+
+  <!-- Favicons (optional: place files in /) -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+
+  <!-- Styles (add your CSS here) -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <nav aria-label="Primary">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#notes">Notes</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="home" tabindex="-1">
+    <section aria-labelledby="site-title">
+      <h1 id="site-title">Gamsam</h1>
+      <p>Welcome to <strong>gamsam.hellonivaan.com</strong> — a simple space to learn, build, and share.</p>
+    </section>
+
+    <section id="about" aria-labelledby="about-title">
+      <h2 id="about-title">About</h2>
+      <p>I’m Jay (“Jayakrishnan”), exploring web fundamentals — HTML, CSS, and JavaScript — and turning ideas into tiny, useful pages.</p>
+    </section>
+
+    <section id="notes" aria-labelledby="notes-title">
+      <h2 id="notes-title">Notes & Links</h2>
+      <ul>
+        <li><a href="#" rel="noopener">Project log</a></li>
+        <li><a href="#" rel="noopener">Code snippets</a></li>
+        <li><a href="#" rel="noopener">Reading list</a></li>
+      </ul>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">Contact</h2>
+      <p>Email: <a href="mailto:hello@hellonivaan.com">hello@hellonivaan.com</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; <span id="y"></span> Gamsam · hellonivaan</p>
+  </footer>
+
+  <script>
+    // tiny enhancement: current year
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
