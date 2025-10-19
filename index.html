@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>hellonivaan</title>
+        <script src= "https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+    </head>
+    <body style = "margin:0; overflow: hidden; ">
+        <script>
+        let symbols = "gam sam hello nivaan". split ("");
+        let streams = [];
+        let bg;
+        let baseFont = 20;
+
+        function setGradient(c1, c2){
+            for(let y=0; y<height; y++){
+                let inter = map(y, 0, height, 0, 1);
+                let c = lerpColor(c1, c2, inter);
+                stroke(c);
+                line(0, y, width, y);
+            }
+        }
+
+        function setup() {
+            createCanvas(windowWidth,windowHeight);
+            textFont('monospace');
+            setFontByViewport();
+            fill(0, 255,120); 
+            makeGradient();
+            for (let i=0;  i <width /baseFont; i++){
+                streams.push(new Stream(i * baseFont, random(-2000,0)));
+
+            }
+        }
+        function draw() {
+            background(10, 0, 25, 150);//slight trail fade..deep violet///
+            setGradient(color(0, 15, 30), color(0, 0, 0));
+            for (let s of streams ) s.update();
+        }
+//
+
+        class Stream {
+            constructor(x, y){
+                this.x = x;
+                 this.y = y;
+                 this.speed = random(3,8);
+                 this.word= random(symbols);
+            }
+            update() {
+                text(this.word, this.x, this.y);
+                this.y += this.speed;
+                if (this.y > height ) {
+                    this.y = random(-200, 0);
+                    this.word = random(symbols);
+
+                }
+            }
+        }
+
+        //===function helpers===//
+        function makeGradient(){
+            bg = createGraphics(width, height);
+            const c1 = color(0, 15, 30);
+            const c2 = color(0, 0, 0);
+            for (let y = 0; y < height ; y++){
+                const t = map(y, 0, height, 0, 1);
+                const c = lerpColor(c1, c2, t);
+                bg.stroke(c);
+                bg.line(0, y, width, y);
+            }
+        }
+        
+        function setFontByViewport(){
+            baseFont = round(constrain(map(min(width, height), 360, 1440, 16, 28)));
+            textSize(baseFont);
+        }
+        function windowResized(){
+            resizeCanvas(windowWidth, windowHeight);
+            setFontByViewport();
+            makeGradient();
+            streams =[];
+            for (let i = 0; i < width / baseFont; i++){
+                streams.push(new Stream(i * baseFont, random(-2000, 0)));
+            }
+        }
+        </script>
+    </body>
+
+</html>
