@@ -2,28 +2,37 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>hellonivaan</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>&infin;hello&hearts;nivaan&infin;
+        </title>
         <script src= "https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+        <link rel="stylesheet" href="./style.css">
     </head>
-    <body style = "margin:0; overflow: hidden; ">
+    <body>
+        <div class="overlay" role="dialog" aria-label="Welcome">
+            <div class="card">
+                <h1>Welcome..coMein..
+                    coMein..
+                </h1>
+                <p>
+                    kindly&hearts;gently&hearts;resposibily&hearts;
+                    enter to only know abxolute ...
+                    sorry the ABSOLUtE..&hearts;
+                    
+                </p>
+                <a class="btn" href="https://gamsam.hellonivaan.com/">EnTer</a>
+            </div>
+        </div>
         <script>
         let letters = Array.from("gamsamhellonivaan");
         let words = ["gam", "sam", "hello", "nivaan"];
         let letterStreams = [];
         let wordStreams= [];
         let symbols = "gam sam hello nivaan".split ("");
-   //   let streams = [];
         let bg;
         let baseFont = 20;
 
-        //nction setGradient(c1, c2){
-        //  for(let y=0; y<height; y++){
-         //     let inter = map(y, 0, height, 0, 1);
-         //     let c = lerpColor(c1, c2, inter);
-         //     stroke(c);
-         //     line(0, y, width, y);
-        //  }
-    //  }
+  
 
         function setup() {
             createCanvas(windowWidth,windowHeight);
@@ -98,24 +107,6 @@
 
         }
 
-
-  //    class Stream {
-     //     constructor(x, y){
-     //         this.x = x;
-      //         this.y = y;
-      //         this.speed = random(3,8);
-       //        this.word= random(symbols);
-        //  }
-          //update() {
-          //    text(this.word, this.x, this.y);
-           //   this.y += this.speed;
-            //  if (this.y > height ) {
-             //     this.y = random(-200, 0);
-               //   this.word = random(symbols);
-
-               //
-          //}
-        //
 
         //===function helpers===//
         function makeGradient(){
