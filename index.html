@@ -7,8 +7,12 @@
     </head>
     <body style = "margin:0; overflow: hidden; ">
         <script>
+        let letters = Array.from("gamsamhellonivaan");
+        let words = ["gam", "sam", "hello", "nivaan"];
+        let letterStreams = [];
+        let wordStreams= [];
         let symbols = "gam sam hello nivaan".split ("");
-        let streams = [];
+   //   let streams = [];
         let bg;
         let baseFont = 20;
 
@@ -27,9 +31,11 @@
             setFontByViewport();
             fill(0, 255,120); 
             makeGradient();
-            strems = [];
+            
             for (let i=0;  i <width /baseFont; i++){
-                streams.push(new Stream(i * baseFont, random(-2000,0)));
+                if (i % 2 == 0) letterStreams.push (new LetterStream(i * baseFont, random(-2000, 0)));
+                else wordStreams.push(new WordStream(i * baseFont, random(-2000, 0)));
+              //streams.push(new Stream(i * baseFont, random(-2000,0)));
             }
         }
         function draw() {
@@ -40,37 +46,82 @@
             rect(0, 0, width, height);
 
             fill(0, 255, 120);
-            for (let s of streams) s.update();
+            for (let s of letterStreams) s.update();
+            for (let w of wordStreams) w.update();
+          //for (let s of streams) s.update();
             
         }
 
-
-        class Stream {
-            constructor(x, y){
-                this.x = x;
-                 this.y = y;
-                 this.speed = random(3,8);
-                 this.word= random(symbols);
+        class LetterStream{
+            constructor(x ,y){
+                this.x=x; this.y=y;
+                this.speed=random(4,8);
             }
-            update() {
-                text(this.word, this.x, this.y);
+            update(){
+                let ch = random(letters);
+                text(ch,this.x, this.y);
                 this.y += this.speed;
-                if (this.y > height ) {
-                    this.y = random(-200, 0);
-                    this.word = random(symbols);
-
-                }
+                if (this.y > height) this.y = random (-200,0);
             }
         }
+
+        class WordStream{
+            constructor(x ,y){
+                this.x=x; this.y=y;
+                this.speed=random(2,6);
+                this.chain= this.makeChain();
+            }
+            makeChain(){
+                let count=floor(random(2,5));
+                let phrase ="";
+                for (let i=0; i<count;i++) phrase += random(words)+"";
+                return phrase.trim();
+            }
+            update(){
+                let parts = this.chain.split("");
+                for (let i=0; i<parts.length; i++){
+                    text(parts[i], this.x, this.y + i*baseFont);
+                }
+                this.y += this.speed;
+                if (this.y > height) {
+                    this.y = random(-200,0);
+                     this.chain= this.makeChain();
+                }
+            }
+
+        }
+
+
+  //    class Stream {
+     //     constructor(x, y){
+     //         this.x = x;
+      //         this.y = y;
+      //         this.speed = random(3,8);
+       //        this.word= random(symbols);
+        //  }
+          //update() {
+          //    text(this.word, this.x, this.y);
+           //   this.y += this.speed;
+            //  if (this.y > height ) {
+             //     this.y = random(-200, 0);
+               //   this.word = random(symbols);
+
+               //
+          //}
+        //
 
         //===function helpers===//
         function makeGradient(){
             bg = createGraphics(width, height);
             const c1 = color(0, 15, 30);
             const c2 = color(0, 0, 0);
+            const c3 = color(25, 0, 45);
+            const c4 = color(0, 25, 50);
+            const c5 = color(25, 15, 0);
+
             for (let y = 0; y < height ; y++){
                 const t = map(y, 0, height, 0, 1);
-                const c = lerpColor(c1, c2, t);
+                const c = lerpColor(c1, c2, c3, c4, c5, t);
                 bg.stroke(c);
                 bg.line(0, y, width, y);
             }
