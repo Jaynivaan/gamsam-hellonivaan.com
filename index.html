@@ -29,6 +29,7 @@
             createCanvas(windowWidth,windowHeight);
             textFont('monospace');
             setFontByViewport();
+            colorMode(HSB);
             fill(0, 255,120); 
             makeGradient();
             
@@ -56,12 +57,14 @@
             constructor(x ,y){
                 this.x=x; this.y=y;
                 this.speed=random(4,8);
+                this.hue=random(100,160);
             }
             update(){
                 let ch = random(letters);
                 text(ch,this.x, this.y);
                 this.y += this.speed;
                 if (this.y > height) this.y = random (-200,0);
+                this.hue=random(100,160);
             }
         }
 
@@ -70,6 +73,7 @@
                 this.x=x; this.y=y;
                 this.speed=random(2,6);
                 this.chain= this.makeChain();
+                this.hue=random(10,360);
             }
             makeChain(){
                 let count=floor(random(2,5));
@@ -80,12 +84,15 @@
             update(){
                 let parts = this.chain.split("");
                 for (let i=0; i<parts.length; i++){
-                    text(parts[i], this.x, this.y + i*baseFont);
+                    fill((this.hue + i*15) % 360, 80, 100);
+                    text(this.chain.split("")[i], this.x, this.y + i*baseFont);
                 }
                 this.y += this.speed;
                 if (this.y > height) {
                     this.y = random(-200,0);
-                     this.chain= this.makeChain();
+                    this.chain= this.makeChain();
+                    this.hue=random(10,360);
+
                 }
             }
 
