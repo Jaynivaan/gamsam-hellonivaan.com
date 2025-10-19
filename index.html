@@ -133,9 +133,13 @@
             resizeCanvas(windowWidth, windowHeight);
             setFontByViewport();
             makeGradient();
-            streams =[];
+            letterStreams = [];
+            wordStreams = [];
             for (let i = 0; i < width / baseFont; i++){
-                streams.push(new Stream(i * baseFont, random(-2000, 0)));
+                if (i % 2 === 0)
+                    letterStreams.push(new LetterStream(i * baseFont, random(-2000, 0)));
+                else
+                    wordStreams.push(new WordStream(i * baseFont, random(-2000, 0)));
             }
         }
         </script>
