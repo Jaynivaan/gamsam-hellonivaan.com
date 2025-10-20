@@ -83,7 +83,7 @@
         }
         //lil helpers
         function buzz(ms=40) { if (navigator.vibrate) navigator.vibrate(ms);};
-        function shake(el){ el.classList.add('shake');setTimer(()=>el.classList.remove('shake'), 650);};
+        function shake(el){ el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'), 650);};
 
         //clickhandler//
         trashEl.addEventListener('click', () => {
