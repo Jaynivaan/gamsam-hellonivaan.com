@@ -103,4 +103,11 @@ canvas {
     height: 64px;
     z-index: 20;
     cursor: pointer;
+    opacity: 0.5;
+    transition: transform .2s, opacity .2s;
+}
+
+.trash:hover {
+    transform: scale(1.05);
+    opacity: 1;
 }
