@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <title>&hearts;ThouGht&infin;tunnel&hearts;</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script src="https://cdn.jsdelivr.net/npm.p5@1.9.0/lib/p5.min.js"></script>
+        <script src="p5.min.js"></script>
         <link rel="stylesheet" href="./thoughttunnel.css">
 
     </head>
@@ -27,21 +27,20 @@
             let nodes = [];
             let baseFont = 20;
             let flash = 255;
-            let logE1;
+            let logEl =null;
             let logLines = [
                 "boot: preparing text tunnel...",
                 "seed: mantra words loaded..",
                 "gpu: canvas accelerated",
                 "net: offline placeholder",
                 "hint: press/hold mouse to speed",
-
             ];
             let logPtr = 0, typer = 0;
 
             function setup(){
                 //prove p5 is loaded:
                 console.log("p5 loaded?", !!window.p5);
-                
+
                 pixelDensity(Math.min(2,window.devicePixelRatio||1));
                 const c = createCanvas(windowWidth, windowHeight);
                 c.elt.style.position='fixed'; c.elt.style.inset='0'; c.elt.style.zIndex='0';
@@ -62,7 +61,7 @@
                 const rings = 36;//how many rings along the tunnel.//
                 const perRing = 18;//nodes per ring//
                 for (let r=0; r< rings; r++){
-                    const z = map(r, 0, rings-1, 1, 14);                    //farther=larger z
+                    const z = map(r, 0, rings-1, 1, 18);                    //farther=larger z
                     for (let i = 0; i< perRing; i++){
                         const a = (i / perRing) * TWO_PI;
                         //RADIUS changes ot make a wavvy tunnel...//
@@ -138,7 +137,11 @@
                     typer+= 1.5;
                     const txt = logLines[logPtr];
                     const shown= Math.min(txt.length, floor(typer));
-                    drawLog([...logLines.slice(0, logPtr), txt.slice(0, shown) + (frameCount%30<15 ? "|": "")]);
+                    const blink = (frameCount % 30 < 15) ? "|":"";
+                    drawLog([
+                        ...logLines.slice(0, logPtr),
+                        txt.slice(0, shown) + blink
+                    ]);
                     if (shown === txt.length){ logPtr++; typer = 0;}
                 } else {
                     drawLog(logLines);
@@ -146,11 +149,12 @@
             }
 
             function drawLog(lines) {
-                logEl.innerHTML = lines.map(l => `<div class="line">> ${escapeHtml(l)}<div>`).join("");                    
+                logEl.innerHTML = lines.map(l => `<div class="line">&gt; ${escapeHtml(l)}</div>`).join("");                    
             }
             
             function escapeHtml(s) {
-                return s.replace(/[&<>"']/g, m=>({ "&": "&amp;", "<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[m]));
+                return s.replace(/[&<>"']/g, ch =>({ 
+                    "&": "&amp;", "<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[ch]));
             }
 
             //responsive  helpers//
