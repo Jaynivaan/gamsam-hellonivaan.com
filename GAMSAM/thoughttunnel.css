@@ -1,0 +1,97 @@
+/* ====== Thought Tunnel — base ====== */
+:root{
+  --bg: #000;                  /* page background */
+  --glass: rgba(0,0,0,.45);    /* HUD glass */
+  --border: rgba(0,255,170,.32);
+  --text: #e6fff5;             /* main text */
+  --muted: 0.82;               /* muted text opacity */
+}
+
+html, body{
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  color: var(--text);
+}
+
+/* p5 canvas sits behind everything */
+canvas{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+}
+
+/* ====== Center message ====== */
+.center{
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  /* safe-area padding for notches */
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+
+  /* responsive type */
+  font: clamp(18px, 4.2vw, 32px)/1.25 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  /* subtle glow */
+  text-shadow: 0 0 18px rgba(0,255,200,.25);
+  pointer-events: none; /* allow clicks through */
+}
+
+.center .muted{
+  opacity: var(--muted);
+  font-size: clamp(12px, 2.6vw, 16px);
+}
+
+/* ====== Console-style HUD (bottom glass card) ====== */
+.hud{
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10;
+
+  max-width: min(92vw, 760px);
+  margin: 0 auto;
+
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+
+  font: 12px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #9fffd8;
+}
+
+.hud .line{
+  white-space: pre;
+  opacity: .95;
+}
+
+/* ====== Accessibility & polish ====== */
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; }
+}
+
+/* Optional: brighten on very dark displays */
+@media (prefers-color-scheme: dark){
+  :root{ --muted: 0.86; }
+}
+
+/* Small phones: tighten bottom HUD spacing */
+@media (max-width: 380px){
+  .hud{ bottom: 8px; padding: 6px 8px; }
+}
