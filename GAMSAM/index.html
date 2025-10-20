@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <title>&hearts;ThouGht&infin;tunnel&hearts;</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script src="https://cdn.jsdelivr.net/npm.p5@1.9.0./lib/p5.min.js"></script>
-        <link rel="stylesheet" href="./thoughtunnel.css">
+        <script src="https://cdn.jsdelivr.net/npm.p5@1.9.0/lib/p5.min.js"></script>
+        <link rel="stylesheet" href="./thoughttunnel.css">
 
     </head>
     <body>
@@ -39,6 +39,9 @@
             let logPtr = 0, typer = 0;
 
             function setup(){
+                //prove p5 is loaded:
+                console.log("p5 loaded?", !!window.p5);
+                
                 pixelDensity(Math.min(2,window.devicePixelRatio||1));
                 const c = createCanvas(windowWidth, windowHeight);
                 c.elt.style.position='fixed'; c.elt.style.inset='0'; c.elt.style.zIndex='0';
@@ -129,7 +132,7 @@
 
             //=====hud==log typing effect====///
             function updateLog(){
-                if (!logE1) return;
+                if (!logEl) return;
                 //type one line at a time//
                 if (logPtr < logLines.length){
                     typer+= 1.5;
@@ -143,11 +146,11 @@
             }
 
             function drawLog(lines) {
-                logE1.innerHTML = lines.map(1 => `<div class="line">> ${escapeHtml(l)}<div>`).join("");                    
+                logEl.innerHTML = lines.map(l => `<div class="line">> ${escapeHtml(l)}<div>`).join("");                    
             }
             
             function escapeHtml(s) {
-                return s.replace(/[&<>"']/g, m=>({ "&": "&amp;", "<":"&lt;",">":"&gt;",'"':"&#39;"}[m]));
+                return s.replace(/[&<>"']/g, m=>({ "&": "&amp;", "<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[m]));
             }
 
             //responsive  helpers//
