@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Text Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- If you saved p5 locally, use: <script src="./p5.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <link rel="stylesheet" href="./portal.css">
+</head>
+<body>
+  <!-- Center text (animated via CSS) -->
+  <div class="center">
+    <div>
+      <div class="title">Don’t know what to build…</div>
+      <div class="muted">kindly return later, sir.</div>
+    </div>
+  </div>
+
+<script>
+// ===================== TEXT PORTAL WITH CURVING PATH (p5) =====================
+let words = ["gam","sam","hello","nivaan","om","hreem","aiem","aink","vank","saum","kleem"];
+let nodes = [];
+let baseFont = 22;
+let flash = 140;
+
+// background animation
+let hueBase = 140;   // slowly cycles hues
+
+// tunnel curve controls (kept simple)
+let turnPhase = 0;   // evolves over time
+let turnFreq  = 0.55;
+let turnAmp   = 2.4; // increase for stronger bends
+
+function setup(){
+  pixelDensity(Math.min(2, window.devicePixelRatio || 1));
+  const c = createCanvas(windowWidth, windowHeight);
+  c.elt.style.position = 'fixed';
+  c.elt.style.inset = '0';
+  c.elt.style.zIndex = '0';
+  c.elt.style.pointerEvents = 'none';
+
+  textFont('monospace');
+  setFontByViewport();
+  buildTunnel();
+}
+
+function buildTunnel(){
+  nodes = [];
+  const rings = 36, perRing = 18;
+  for (let r=0; r<rings; r++){
+    const z = map(r, 0, rings-1, 1, 14);
+    for (let i=0; i<perRing; i++){
+      const a = (i / perRing) * TWO_PI;
+      const radius = 2.4 + 0.9 * sin(r*0.35 + i*0.75); // wavy radius
+      nodes.push({
+        a, r: radius, z,
+        word: random(words),
+        hue: (100 + (r*7 + i*9)) % 360,
+      });
+    }
+  }
+}
+
+// Curved centerline + slight yaw/bank based on depth
+function pathOffset(z, t){
+  // z is ~ 1..14 (near..far). Push curve more into distance.
+  const depthScale = map(z, 1, 14, 0.35, 1.15);
+  const ox = depthScale * baseFont * turnAmp * sin(z * turnFreq + t);
+  const oy = depthScale * baseFont * (turnAmp * 0.72) * cos(z * (turnFreq*0.8) + t * 0.9);
+  const yaw = 0.18 * sin(z * 0.35 + t * 0.6); // radians
+  return { ox, oy, yaw };
+}
+
+function draw(){
+  drawBg(); // animated background
+
+  // trails veil (subtle)
+  noStroke(); fill(0, 0, 0, 26); rect(0, 0, width, height);
+
+  translate(width/2, height/2);
+
+  const fov = 1.2;
+  const speed = (mouseIsPressed ? 0.16 : 0.085); // always forward
+  const swirl = 0.004; // gentle global spin
+
+  // advance curvature phase
+  turnPhase += 0.015;
+
+  colorMode(HSB);
+  textAlign(CENTER, CENTER);
+  textSize(baseFont);
+
+  for (let n of nodes){
+    n.z -= speed;
+    n.a += swirl;
+
+    if (n.z <= 0.7){
+      n.z = 14 + random(0.5);
+      n.word = random(words);
+      n.hue  = (n.hue + random(40,120)) % 360;
+    }
+
+    // perspective scale
+    const k = (fov * baseFont) / n.z;
+
+    // local ring position (before bend)
+    const lx = cos(n.a) * n.r * baseFont * 1.4;
+    const ly = sin(n.a) * n.r * baseFont * 1.0;
+
+    // curve offsets + yaw
+    const { ox, oy, yaw } = pathOffset(n.z, turnPhase);
+
+    // apply yaw to the local ring
+    const rx = lx * cos(yaw) - ly * sin(yaw);
+    const ry = lx * sin(yaw) + ly * cos(yaw);
+
+    // final screen coords, project
+    const x = (rx + ox) * k;
+    const y = (ry + oy) * k;
+
+    // draw vertical column of each word
+    const chars = n.word.split("");
+    for (let i=0; i<chars.length; i++){
+      fill((n.hue + i*12) % 360, 80, 100);
+      text(chars[i], x, y + i * (baseFont * k));
+    }
+  }
+
+  // entrance flash
+  if (flash > 0){
+    colorMode(RGB);
+    fill(255, flash);
+    rect(-width/2, -height/2, width, height);
+    flash = max(0, flash - 10);
+  }
+}
+
+// =============== Animated Background (gentle aura + vignette) ===============
+function drawBg(){
+  colorMode(HSB);
+  hueBase = (hueBase + 0.12) % 360;
+
+  // soft hue wash
+  noStroke();
+  fill(hueBase, 70, 8);
+  rect(0,0,width,height);
+
+  // breathing auras
+  let beat = (sin(millis()*0.002)+1)/2; // 0..1
+  let s1 = lerp(width*0.5, width*1.0, beat);
+  let s2 = lerp(width*0.9, width*0.45, beat);
+  fill((hueBase+120)%360, 70, 12, 0.18); ellipse(width*0.28, height*0.38, s1, s1);
+  fill((hueBase+300)%360, 70, 12, 0.18); ellipse(width*0.72, height*0.62, s2, s2);
+
+  // vignette
+  colorMode(RGB);
+  drawVignette(0.26);
+}
+
+function drawVignette(strength=0.25){
+  noFill(); stroke(0, 0, 0, 120*strength);
+  for (let i=0; i<10; i++){
+    rect(0+i, 0+i, width-2*i, height-2*i);
+  }
+}
+
+// responsive helpers
+function setFontByViewport(){
+  baseFont = round(constrain(map(min(windowWidth, windowHeight), 360, 1440, 16, 28), 14, 34));
+  textSize(baseFont);
+}
+function windowResized(){ resizeCanvas(windowWidth, windowHeight); setFontByViewport(); }
+</script>
+</body>
+</html>
