@@ -94,3 +94,13 @@ canvas {
     outline-offset: 3px;
 
 }
+
+.trash {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 64px;
+    height: 64px;
+    z-index: 20;
+    cursor: pointer;
+}

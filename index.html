@@ -22,6 +22,26 @@
                 </p>
                 <a class="btn" href="https://gamsam.hellonivaan.com/">EnTer</a>
             </div>
+        </div id ="trash-icon" class="trash"></div> 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js">
+            const trashAnim = lottie.loadAnimation({
+                container: document.getElementById('trash-icon'),
+                renderer: 'svg',
+                loop: true, 
+                autoplay: true,
+                path: './litter.json'
+
+            });
+
+            document.getElementById('trash-icon').addEventListener('click', ()=>{
+                alert("Detected negetive energy , !!click ockai to confirm you are one sir,,,");
+                if (confirm("do you wish to discard the hate here sir ")){
+                    alert("Hate discarded...too much hate is close to undetachable LOVE..../n i love you tooo!!!")
+
+                }
+        
+            })
+        </script>     
         </div>
         <script>
         let letters = Array.from("gamsamhellonivaan");
