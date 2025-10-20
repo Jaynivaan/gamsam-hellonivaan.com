@@ -2,52 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>♥ ThouGht ∞ tunnel ♥</title>
+  <title>Text Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Use your local copy if you saved it: <script src="./p5.min.js"></script> -->
+  <!-- If you saved p5 locally, use: <script src="./p5.min.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
-  <style>
-    :root{
-      --text:#e6fff5;
-      --accent:#00ffaa;
-    }
-    html,body{margin:0;height:100%;background:#000;overflow:hidden;color:var(--text)}
-    canvas{position:fixed;inset:0;z-index:0;display:block;pointer-events:none}
-
-    /* Center message with unconventional animation */
-    .center{
-      position:fixed;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;
-      text-align:center;padding:16px; pointer-events:none;
-      font: clamp(18px,4.2vw,32px)/1.25 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    }
-    .title{
-      display:inline-block;
-      --shimmer: linear-gradient(120deg, rgba(0,255,200,.1), rgba(255,255,255,.9), rgba(0,255,200,.1));
-      background-image: var(--shimmer);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: shimmer 3.6s ease-in-out infinite, float 6s ease-in-out infinite;
-      text-shadow: 0 0 18px rgba(0,255,200,.25);
-    }
-    .muted{
-      opacity:.85; margin-top:.25em;
-      animation: chroma 4.5s ease-in-out infinite;
-    }
-    @keyframes shimmer{ 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    @keyframes float{ 0%{transform: translateY(0) rotate(0deg)} 50%{transform: translateY(-6px) rotate(0.2deg)} 100%{transform: translateY(0) rotate(0deg)}}
-    @keyframes chroma{
-      0%{ text-shadow: 0 0 10px rgba(0,255,170,.3), 0 0 0 rgba(255,0,170,0)}
-      50%{ text-shadow: 0 0 18px rgba(255,0,170,.35), 0 0 28px rgba(0,255,170,.25)}
-      100%{ text-shadow: 0 0 10px rgba(0,255,170,.3), 0 0 0 rgba(255,0,170,0)}
-    }
-
-    /* Hide HUD log completely for now */
-    .hud{ display:none; }
-  </style>
+  <link rel="stylesheet" href="./portal.css">
 </head>
 <body>
+  <!-- Center text (animated via CSS) -->
   <div class="center">
     <div>
       <div class="title">Don’t know what to build…</div>
@@ -55,29 +17,28 @@
     </div>
   </div>
 
-  <div class="hud" id="log"></div>
-
 <script>
-// ================= Text Portal with Animated Background =================
+// ===================== TEXT PORTAL WITH CURVING PATH (p5) =====================
 let words = ["gam","sam","hello","nivaan","om","hreem","aiem","aink","vank","saum","kleem"];
 let nodes = [];
 let baseFont = 22;
-let flash = 160;
+let flash = 140;
 
-// background modes
-let bgMode = 0;           // 0 = hue wash, 1 = twin auras, 2 = dark wave
-let hueBase = 120;        // animated hue
+// background animation
+let hueBase = 140;   // slowly cycles hues
 
-// tunnel controls (direction / spin)
-let dir = 1;              // 1 = toward camera, -1 = away
-let spin = 1;             // 1 = clockwise, -1 = anticlockwise
-let autoFlipTimer = 0;
+// tunnel curve controls (kept simple)
+let turnPhase = 0;   // evolves over time
+let turnFreq  = 0.55;
+let turnAmp   = 2.4; // increase for stronger bends
 
 function setup(){
-  pixelDensity(Math.min(2, window.devicePixelRatio||1));
+  pixelDensity(Math.min(2, window.devicePixelRatio || 1));
   const c = createCanvas(windowWidth, windowHeight);
-  c.elt.style.position='fixed'; c.elt.style.inset='0'; c.elt.style.zIndex='0';
-  c.elt.style.pointerEvents='none';
+  c.elt.style.position = 'fixed';
+  c.elt.style.inset = '0';
+  c.elt.style.zIndex = '0';
+  c.elt.style.pointerEvents = 'none';
 
   textFont('monospace');
   setFontByViewport();
@@ -90,8 +51,8 @@ function buildTunnel(){
   for (let r=0; r<rings; r++){
     const z = map(r, 0, rings-1, 1, 14);
     for (let i=0; i<perRing; i++){
-      const a = (i/perRing) * TWO_PI;
-      const radius = 2.4 + 0.9 * sin(r*0.35 + i*0.75);
+      const a = (i / perRing) * TWO_PI;
+      const radius = 2.4 + 0.9 * sin(r*0.35 + i*0.75); // wavy radius
       nodes.push({
         a, r: radius, z,
         word: random(words),
@@ -101,36 +62,64 @@ function buildTunnel(){
   }
 }
 
-function draw(){
-  drawBg();  // animated background behind the tunnel
+// Curved centerline + slight yaw/bank based on depth
+function pathOffset(z, t){
+  // z is ~ 1..14 (near..far). Push curve more into distance.
+  const depthScale = map(z, 1, 14, 0.35, 1.15);
+  const ox = depthScale * baseFont * turnAmp * sin(z * turnFreq + t);
+  const oy = depthScale * baseFont * (turnAmp * 0.72) * cos(z * (turnFreq*0.8) + t * 0.9);
+  const yaw = 0.18 * sin(z * 0.35 + t * 0.6); // radians
+  return { ox, oy, yaw };
+}
 
-  // motion trails veil (subtle)
-  noStroke(); fill(0, 0, 0, 30); rect(0, 0, width, height);
+function draw(){
+  drawBg(); // animated background
+
+  // trails veil (subtle)
+  noStroke(); fill(0, 0, 0, 26); rect(0, 0, width, height);
 
   translate(width/2, height/2);
 
   const fov = 1.2;
-  const speed = (mouseIsPressed ? 0.16 : 0.085) * dir;
-  const swirl = 0.004 * spin;
+  const speed = (mouseIsPressed ? 0.16 : 0.085); // always forward
+  const swirl = 0.004; // gentle global spin
+
+  // advance curvature phase
+  turnPhase += 0.015;
 
   colorMode(HSB);
   textAlign(CENTER, CENTER);
   textSize(baseFont);
 
   for (let n of nodes){
-    n.z -= speed;           // reverse-able flow
-    n.a += swirl;           // reverse-able spin
+    n.z -= speed;
+    n.a += swirl;
 
-    if ((dir === 1 && n.z <= 0.7) || (dir === -1 && n.z >= 15)){
-      n.z = (dir === 1) ? 14 + random(0.5) : 1 + random(0.5);
+    if (n.z <= 0.7){
+      n.z = 14 + random(0.5);
       n.word = random(words);
-      n.hue = (n.hue + random(40,120)) % 360;
+      n.hue  = (n.hue + random(40,120)) % 360;
     }
 
+    // perspective scale
     const k = (fov * baseFont) / n.z;
-    const x = cos(n.a) * n.r * baseFont * 1.4 * k;
-    const y = sin(n.a) * n.r * baseFont * 1.0 * k;
 
+    // local ring position (before bend)
+    const lx = cos(n.a) * n.r * baseFont * 1.4;
+    const ly = sin(n.a) * n.r * baseFont * 1.0;
+
+    // curve offsets + yaw
+    const { ox, oy, yaw } = pathOffset(n.z, turnPhase);
+
+    // apply yaw to the local ring
+    const rx = lx * cos(yaw) - ly * sin(yaw);
+    const ry = lx * sin(yaw) + ly * cos(yaw);
+
+    // final screen coords, project
+    const x = (rx + ox) * k;
+    const y = (ry + oy) * k;
+
+    // draw vertical column of each word
     const chars = n.word.split("");
     for (let i=0; i<chars.length; i++){
       fill((n.hue + i*12) % 360, 80, 100);
@@ -145,74 +134,43 @@ function draw(){
     rect(-width/2, -height/2, width, height);
     flash = max(0, flash - 10);
   }
-
-  // auto flip the direction every ~8 seconds for “change-direction effect”
-  autoFlipTimer += deltaTime;
-  if (autoFlipTimer > 8000){
-    dir *= -1;
-    spin *= -1;
-    autoFlipTimer = 0;
-  }
 }
 
-// -------- Animated Backgrounds (HSB aura / auras / waves) --------
+// =============== Animated Background (gentle aura + vignette) ===============
 function drawBg(){
   colorMode(HSB);
-  hueBase = (hueBase + 0.15) % 360;
+  hueBase = (hueBase + 0.12) % 360;
 
-  if (bgMode === 0){
-    // Mode 0: Slow hue wash + vignette
-    noStroke();
-    fill(hueBase, 70, 8); rect(0,0,width,height);
-    fill((hueBase+60)%360, 70, 10, 0.2); ellipse(width*0.25, height*0.35, width*0.9, height*0.9);
-    fill((hueBase+200)%360, 70, 10, 0.2); ellipse(width*0.75, height*0.65, width, height);
-    // soft vignette
-    colorMode(RGB);
-    drawVignette(0.25);
-  } else if (bgMode === 1){
-    // Mode 1: Twin breathing auras
-    noStroke();
-    let beat = (sin(millis()*0.002)+1)/2; // 0..1
-    let size1 = lerp(width*0.6, width*1.1, beat);
-    let size2 = lerp(width*0.9, width*0.5, beat);
-    fill((hueBase+140)%360, 70, 12, 0.18); ellipse(width*0.3, height*0.4, size1, size1);
-    fill((hueBase+320)%360, 70, 12, 0.18); ellipse(width*0.7, height*0.6, size2, size2);
-    colorMode(RGB);
-    drawVignette(0.28);
-  } else {
-    // Mode 2: Dark wave bands
-    noStroke();
-    for (let y=0; y<height; y+=8){
-      let t = (y/height + millis()*0.0006) % 1;
-      let b = 6 + 6*sin(TWO_PI*t);
-      fill(hueBase, 60, b, 0.6);
-      rect(0, y, width, 8);
-    }
-    colorMode(RGB);
-    drawVignette(0.3);
-  }
+  // soft hue wash
+  noStroke();
+  fill(hueBase, 70, 8);
+  rect(0,0,width,height);
+
+  // breathing auras
+  let beat = (sin(millis()*0.002)+1)/2; // 0..1
+  let s1 = lerp(width*0.5, width*1.0, beat);
+  let s2 = lerp(width*0.9, width*0.45, beat);
+  fill((hueBase+120)%360, 70, 12, 0.18); ellipse(width*0.28, height*0.38, s1, s1);
+  fill((hueBase+300)%360, 70, 12, 0.18); ellipse(width*0.72, height*0.62, s2, s2);
+
+  // vignette
+  colorMode(RGB);
+  drawVignette(0.26);
 }
 
 function drawVignette(strength=0.25){
-  // simple vignette using transparent black edges
   noFill(); stroke(0, 0, 0, 120*strength);
   for (let i=0; i<10; i++){
     rect(0+i, 0+i, width-2*i, height-2*i);
   }
 }
 
-// --------- Responsive & Controls ----------
+// responsive helpers
 function setFontByViewport(){
   baseFont = round(constrain(map(min(windowWidth, windowHeight), 360, 1440, 16, 28), 14, 34));
   textSize(baseFont);
 }
 function windowResized(){ resizeCanvas(windowWidth, windowHeight); setFontByViewport(); }
-
-function keyPressed(){
-  if (key === 'R' || key === 'r'){ dir *= -1; }
-  if (key === 'S' || key === 's'){ spin *= -1; }
-  if (key === 'B' || key === 'b'){ bgMode = (bgMode+1)%3; }
-}
 </script>
 </body>
 </html>
