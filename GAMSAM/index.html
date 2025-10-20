@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>&hearts;ThouGht&infin;tunnel&hearts;</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script src="https://cdn.jsdelivr.net/npm.p5@1.9.0./lib/p5.min.js"></script>
+        <link rel="stylesheet" href="./thoughtunnel.css">
+
+    </head>
+    <body>
+        <div class="center">
+            <div>
+                <div>Don't know  what to build...</div>
+                <div class="muted"> kindly return later, sir... </div>
+            </div>
+        </div>
+        <div class="hud" id="log"></div>
+
+        <script>
+            //============================================================================================
+            //===================portal of text//================================//
+            //words form rings in 3d (polarcordinates), moving toward]//
+            //the camera (decreasing z ). simple perspective projections..//
+            //============================================================================================
+            let words = ["gam", "sam", "hello", "nivaan","om", "hreem", "aiem", "aink", "vank", "saum", "kleem"]
+            let nodes = [];
+            let baseFont = 20;
+            let flash = 255;
+            let logE1;
+            let logLines = [
+                "boot: preparing text tunnel...",
+                "seed: mantra words loaded..",
+                "gpu: canvas accelerated",
+                "net: offline placeholder",
+                "hint: press/hold mouse to speed",
+
+            ];
+            let logPtr = 0, typer = 0;
+
+            function setup(){
+                pixelDensity(Math.min(2,window.devicePixelRatio||1));
+                const c = createCanvas(windowWidth, windowHeight);
+                c.elt.style.position='fixed'; c.elt.style.inset='0'; c.elt.style.zIndex='0';
+                c.elt.style.pointerEvents='none';
+
+                textFont('monospace');
+                setFontByViewport();
+
+                logE1 = document.getElementById('log');
+
+                //build initial tunnel
+                buildTunnel();
+
+            }
+
+            function buildTunnel(){
+                nodes = [];
+                const rings = 36;//how many rings along the tunnel.//
+                const perRing = 18;//nodes per ring//
+                for (let r=0; r< rings; r++){
+                    const z = map(r, 0, rings-1, 1, 14);                    //farther=larger z
+                    for (let i = 0; i< perRing; i++){
+                        const a = (i / perRing) * TWO_PI;
+                        //RADIUS changes ot make a wavvy tunnel...//
+                        const radius = 2.4 + 0.9 * sin( r*0.35 + i*0.75);
+                        nodes.push({
+                            a, r: radius, z,
+                            word: random(words),
+                            hue: (100 + (r*7 + i*9)) % 360, //colorfulbands..//
+                            jitter: random (1000)
+                        });
+                    }
+                }
+            }
+
+            function draw(){
+                // semi transparent veil for the motion trails....
+                noStroke();
+                fill(0, 0, 0, 40); rect(0, 0, width, height);
+
+                ///center///
+                translate(width/2, height/2);
+
+                //perspective parameters..
+                const fov = 1.2;//highter is stronger depth//
+                const speed = (mouseIsPressed ? 0.16 : 0.085);///hold to speedup//
+                const swirl = 0.004;  // gentle rotation//
+
+                colorMode(HSB);
+                textAlign(CENTER, CENTER);
+                textSize(baseFont);
+
+                //animate and draw each node..
+                for (let n of nodes) {
+                    n.z -= speed;  //move toward the viewwe
+                    n.a += swirl;//slow tunnel spin
+                    //recycle nodes that passed the camera..
+
+                    if (n.z <= 0.7){
+                        n.z = 14 + random(0.5);
+                        n.word = random(words);
+                        n.hue = (n.hue + random(40,120)) % 360;
+
+                    }
+                    //3d to 2d projection
+                    const k = (fov * baseFont) / n.z; //perspective scale factor//
+                    const x = cos(n.a) * n.r * baseFont * 1.4 *k;
+                    const y = sin(n.a) * n.r * baseFont * 1.0 *k;
+
+                    //vertical stacking to feel like coloumns
+                    const chars = n.word.split("");
+                    for (let i=0; i<chars.length; i++){
+                        fill((n.hue + i*12) % 360, 80, 100);
+                        text(chars[i], x, y + i * (baseFont * k));
+                    }
+                }
+                //fade the initial white flash
+                if (flash >0) {
+                    colorMode(RGB);
+                    fill(255, flash); rect(-width/2, -height/2, width, height);
+                    flash = max(0, flash - 12);
+
+                }
+
+                //update the tiny console 
+                updateLog();                                
+            }
+
+            //=====hud==log typing effect====///
+            function updateLog(){
+                if (!logE1) return;
+                //type one line at a time//
+                if (logPtr < logLines.length){
+                    typer+= 1.5;
+                    const txt = logLines[logPtr];
+                    const shown= Math.min(txt.length, floor(typer));
+                    drawLog([...logLines.slice(0, logPtr), txt.slice(0, shown) + (frameCount%30<15 ? "|": "")]);
+                    if (shown === txt.length){ logPtr++; typer = 0;}
+                } else {
+                    drawLog(logLines);
+                }
+            }
+
+            function drawLog(lines) {
+                logE1.innerHTML = lines.map(1 => `<div class="line">> ${escapeHtml(l)}<div>`).join("");                    
+            }
+            
+            function escapeHtml(s) {
+                return s.replace(/[&<>"']/g, m=>({ "&": "&amp;", "<":"&lt;",">":"&gt;",'"':"&#39;"}[m]));
+            }
+
+            //responsive  helpers//
+            function setFontByViewport(){
+                baseFont =  round ( constrain(map(min(windowWidth,windowHeight),360, 1440, 16,28), 14, 32));
+            }
+
+            function windowResized(){
+                resizeCanvas(windowWidth, windowHeight);
+                setFontByViewport();
+            }
+
+
+
+
+        </script>
+    </body>
+
+</html>
