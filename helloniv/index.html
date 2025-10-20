@@ -1,1 +1,187 @@
 <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>&infin;hello&hearts;nivaan&infin;</title>
+
+    <!-- p5.js for code rain -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+
+    <!-- Fallback styles to prevent full-screen Lottie flash BEFORE external CSS loads -->
+    <style>
+      /* page basics */
+      html, body { height:100%; margin:0; background:#000; overflow:hidden; }
+
+      /* ensure canvas stays behind and never steals clicks */
+      canvas { position:fixed; inset:0; z-index:0; display:block; pointer-events:none; }
+
+      /* overlay above canvas */
+      .overlay { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; }
+
+      /* trash: fixed size + hidden until animation is ready */
+      #trash-icon.trash {
+        position:fixed; bottom:28px; right:28px;
+        width:64px; height:64px;
+        z-index:20; cursor:pointer;
+        visibility:hidden;         /* reveal after Lottie DOM is built */
+      }
+    </style>
+
+    <!-- Your external CSS (loads after fallback) -->
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div class="overlay" role="dialog" aria-label="Welcome">
+      <div class="card">
+        <h1>Welcome..coMein.. coMein..</h1>
+        <p>
+          kindly&hearts;gently&hearts;resposibily&hearts;<br />
+          enter to only know abxolute ...<br />
+          sorry the ABSOLUtE..&hearts;
+        </p>
+        <a class="btn" href="https://gamsam.hellonivaan.com/">EnTer</a>
+      </div>
+    </div>
+
+    <!-- Trash icon container -->
+    <div id="trash-icon" class="trash"></div>
+
+    <!-- Lottie -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+    <!-- Inline JSON (keep your JSON here exactly; large is OK) -->
+    <script id="trash-data" type="application/json">
+      { /* paste your Lottie JSON here */ }
+    </script>
+
+    <!-- Initialize Lottie AFTER DOM is ready; reveal only when the SVG is mounted -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const trashEl   = document.getElementById('trash-icon');
+        const jsonText  = document.getElementById('trash-data').textContent.trim();
+        let   anim      = null;
+
+        try {
+          const data = JSON.parse(jsonText);
+          anim = lottie.loadAnimation({
+            container: trashEl,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            animationData: data
+          });
+
+          // Reveal only after Lottie has created the SVG DOM
+          const reveal = () => (trashEl.style.visibility = 'visible');
+          anim.addEventListener('DOMLoaded', reveal);       // primary
+          anim.addEventListener('data_ready', reveal);      // fallback
+          // absolute fallback in case events don't fire (rare)
+          setTimeout(reveal, 1200);
+
+        } catch (e) {
+          console.error('Invalid Lottie JSON:', e);
+        }
+
+        // Click handler
+        trashEl.addEventListener('click', () => {
+          alert("🚨 Detected neGetEve energy , !!cliCk OcKai to cONFIRm you are one heavy hATE conTAINer sir... if not, click cancel, sir.");
+          if (confirm("Discard the hate here, sir? 💚 \n(garbage / negative energy came first… choose love.)")) {
+            alert("✨ Hate discarded. Love is stronger. I love you too!");
+          }
+        });
+      });
+    </script>
+
+    <!-- Code rain -->
+    <script>
+      let letters = Array.from("gamsamhellonivaan");
+      let words = ["gam", "sam", "hello", "nivaan"];
+      let letterStreams = [];
+      let wordStreams = [];
+      let bg;
+      let baseFont = 20;
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        textFont('monospace');
+        setFontByViewport();
+        colorMode(HSB);
+        fill(0, 255, 120);
+        makeGradient();
+
+        for (let i = 0; i < width / baseFont; i++) {
+          if (i % 2 === 0) letterStreams.push(new LetterStream(i * baseFont, random(-2000, 0)));
+          else              wordStreams.push(new WordStream (i * baseFont, random(-2000, 0)));
+        }
+      }
+
+      function draw() {
+        image(bg, 0, 0, width, height);
+        noStroke(); fill(0, 35); rect(0, 0, width, height);  // trails
+
+        for (let s of letterStreams) s.update();
+        for (let w of wordStreams)  w.update();
+      }
+
+      class LetterStream {
+        constructor(x, y){ this.x=x; this.y=y; this.speed=random(4,8); this.hue=random(100,160); }
+        update(){
+          fill(this.hue, 80, 100);
+          text(random(letters), this.x, this.y);
+          this.y += this.speed;
+          if (this.y > height) this.y = random(-200, 0);
+          this.hue = random(100, 160);
+        }
+      }
+
+      class WordStream {
+        constructor(x, y){ this.x=x; this.y=y; this.speed=random(2,6); this.chain=this.makeChain(); this.hue=random(10,360); }
+        makeChain(){
+          const count = floor(random(2,5));
+          return Array.from({length:count}, () => random(words)).join(" ");
+        }
+        update(){
+          const parts = this.chain.split("");
+          for (let i=0; i<parts.length; i++){
+            fill((this.hue + i*15) % 360, 80, 100);
+            text(parts[i], this.x, this.y + i*baseFont);
+          }
+          this.y += this.speed;
+          if (this.y > height){
+            this.y = random(-200, 0);
+            this.chain = this.makeChain();
+            this.hue = random(10, 360);
+          }
+        }
+      }
+
+      function makeGradient(){
+        bg = createGraphics(width, height);
+        const c1 = color(0, 15, 30), c2 = color(0, 0, 0);
+        for (let y = 0; y < height; y++){
+          const t = map(y, 0, height, 0, 1);
+          const c = lerpColor(c1, c2, t);
+          bg.stroke(c); bg.line(0, y, width, y);
+        }
+      }
+
+      function setFontByViewport(){
+        baseFont = round(constrain(map(min(width, height), 360, 1440, 16, 28), 16, 28));
+        textSize(baseFont);
+      }
+
+      function windowResized(){
+        resizeCanvas(windowWidth, windowHeight);
+        setFontByViewport();
+        makeGradient();
+        letterStreams = []; wordStreams = [];
+        for (let i=0; i < width / baseFont; i++){
+          if (i % 2 === 0) letterStreams.push(new LetterStream(i * baseFont, random(-2000, 0)));
+          else              wordStreams.push(new WordStream (i * baseFont, random(-2000, 0)));
+        }
+      }
+    </script>
+  </body>
+</html>
